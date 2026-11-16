@@ -42,6 +42,17 @@ python -m pip install -r requirements.txt
 python --version
 ```
 
+## Testing
+
+Run the unit tests with:
+
+```powershell
+python -m unittest -v
+```
+
+The tests cover normalization, missing values, frequency mapping, and audio
+sample generation without downloading astronomical data.
+
 ## Basic usage
 
 From the project directory:
@@ -55,6 +66,26 @@ python .\cosmophone.py `
 ```
 
 Files are saved automatically in the `output/` directory.
+
+## Streamlit interface
+
+Cosmophone also includes an interactive web interface for experimenting with
+the sonification parameters and listening directly in the browser.
+
+Start it from the project directory:
+
+```powershell
+streamlit run .\app.py
+```
+
+The interface supports:
+
+- manual numeric values;
+- CSV uploads;
+- Kepler targets with a selected quarter;
+- TESS targets with a selected sector;
+- frequency range, duration, smoothing, and pentatonic quantization;
+- interactive plots of the processed data and mapped frequencies.
 
 ## Main parameters
 
