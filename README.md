@@ -7,28 +7,31 @@ brightness into evolving melodies, continuous glissandi, or discrete musical
 notes. The same pipeline can be used with synthetic data, CSV files, or real
 light curves from the Kepler and TESS missions.
 
-The `output/` directory currently contains generated WAV files and plots for
-several example targets, including Kepler-10, RR Lyrae, V1154 Cygni,
-KIC 9832227, and KIC 8462852. These outputs make it possible to compare the
-source data with the resulting sound while exploring the project. As the
-collection grows, this directory will be cleaned up and renamed to
-`examples/` to keep the project structure more organized.
+## How the sonification works
 
-### Current examples
+The input samples are interpreted as a one-dimensional signal:
 
-- [Kepler-10 audio](output/kepler10.wav) · [plot](output/kepler10.png)
-- [RR Lyrae audio](output/rr_lyrae.wav) · [plot](output/rr_lyrae.png)
-- [V1154 Cygni audio](output/v1154_cyg.wav) · [plot](output/v1154_cyg.png)
-- [KIC 9832227 audio](output/kic9832227.wav) · [plot](output/kic9832227.png)
-- [Boyajian's Star audio](output/boyajian.wav) · [plot](output/boyajian.png)
+- sample position → position in playback time;
+- data value → pitch;
+- missing values → linear interpolation;
+- smoothing → noise reduction;
+- frequency range → selectable minimum and maximum pitch;
+- optional quantization → pentatonic musical scale.
 
-The pipeline:
+The signal is resampled to match the selected audio duration. Frequencies are
+converted into a continuous oscillator phase, which avoids clicks during pitch
+changes. A short fade-in and fade-out are applied before writing the WAV file.
 
-1. loads manual data, CSV files, or Kepler/TESS light curves;
-2. handles missing values and noise;
-3. normalizes the data;
-4. maps values to audio frequencies;
-5. generates a WAV file and, optionally, a plot.
+## What to listen for
+
+- **Kepler-10**: mostly stable brightness with subtle variations ([Kepler-10 audio](output/kepler10.wav) · [plot](output/kepler10.png));
+- **RR Lyrae**: a repeating pulsation pattern ([RR Lyrae audio](output/rr_lyrae.wav) · [plot](output/rr_lyrae.png));
+- **V1154 Cygni**: a slower, more regular stellar cycle ([V1154 Cygni audio](output/v1154_cyg.wav) · [plot](output/v1154_cyg.png));
+- **KIC 9832227**: sharp changes associated with eclipses ([KIC 9832227 audio](output/kic9832227.wav) · [plot](output/kic9832227.png));
+- **KIC 8462852**: irregular brightness variations and abrupt events ([Boyajian's Star audio](output/boyajian.wav) · [plot](output/boyajian.png)).
+
+The audio is not a literal recording of the stars. It is a mapping from
+measured brightness variations to audible frequencies.
 
 ## Requirements
 
@@ -78,14 +81,16 @@ Start it from the project directory:
 streamlit run .\app.py
 ```
 
-The interface supports:
+The interface provides three input modes:
 
 - manual numeric values;
-- CSV uploads;
-- Kepler targets with a selected quarter;
-- TESS targets with a selected sector;
-- frequency range, duration, smoothing, and pentatonic quantization;
-- interactive plots of the processed data and mapped frequencies.
+- CSV file upload;
+- astronomical target lookup from Kepler or TESS.
+
+After processing the data, the app displays the mapped curve, plays the
+generated sound in the browser, and provides a WAV download button.
+
+The WAV filename can be customized directly from the interface.
 
 ## Main parameters
 

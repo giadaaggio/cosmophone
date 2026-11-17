@@ -99,6 +99,11 @@ duration = st.slider('Duration of the sound (seconds):', min_value=1, max_value=
 
 quantize = st.checkbox('Use pentatonic scale')
 
+output_filename = st.text_input(
+    "Output filename",
+    "cosmophone.wav",
+)
+
 if st.button('Generate sound'):
     if input_mode == "Astronomical target":
         if not target:
@@ -106,12 +111,13 @@ if st.button('Generate sound'):
             st.stop()
 
         try:
-            values = load_lightcurve(
-                target,
-                mission=mission,
-                quarter=quarter,
-                sector=sector,
-            )
+            with st.spinner("Downloading light curve..."):
+                values = load_lightcurve(
+                    target,
+                    mission=mission,
+                    quarter=quarter,
+                    sector=sector,
+                )
         except ValueError as error:
             st.error(str(error))
             st.stop()
@@ -145,7 +151,17 @@ if st.button('Generate sound'):
         st.error("Maximum frequency must be greater than minimum frequency.")
         st.stop()
 
+    # Recap of input data
     st.write(f'Loaded samples: {len(values)}')
+    if input_mode == "Astronomical target":
+        st.write(f"Target: {target}")
+        st.write(f"Mission: {mission}")
+
+    if mission == "Kepler":
+        st.write(f"Quarter: {quarter}")
+    else:
+        st.write(f"Sector: {sector}")
+
     values = fill_missing(values)
     values = normalize(values)
     values = smooth_data(values, smooth_window)
@@ -189,6 +205,6 @@ if st.button('Generate sound'):
     st.download_button(
         "Download WAV",
         data=audio_bytes,
-        file_name="cosmophone.wav",
+        file_name=output_filename,
         mime="audio/wav",
     )
