@@ -4,6 +4,7 @@ import numpy as np
 from scipy.io import wavfile
 from cosmophone import (
     apply_fade,
+    fill_missing,
     generate_tone,
     load_lightcurve,
     map_to_frequency,
@@ -144,6 +145,8 @@ if st.button('Generate sound'):
         st.error("Maximum frequency must be greater than minimum frequency.")
         st.stop()
 
+    st.write(f'Loaded samples: {len(values)}')
+    values = fill_missing(values)
     values = normalize(values)
     values = smooth_data(values, smooth_window)
 
@@ -176,7 +179,16 @@ if st.button('Generate sound'):
         (tone * 32767).astype(np.int16),
     )
 
+    audio_bytes = audio_buffer.getvalue()
+
     st.audio(
-        audio_buffer.getvalue(),
+        audio_bytes,
         format='audio/wav',
+    )
+
+    st.download_button(
+        "Download WAV",
+        data=audio_bytes,
+        file_name="cosmophone.wav",
+        mime="audio/wav",
     )
