@@ -13,7 +13,14 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 # load data from a light curve file
-def load_lightcurve(target, mission='Kepler', quarter=None, sector=None, download_all=False):
+def load_lightcurve(
+    target,
+    mission='Kepler',
+    quarter=None,
+    sector=None,
+    download_all=False,
+    return_metadata=False,
+):
     search_parameters = {'mission': mission}
 
     if mission == 'Kepler' and quarter is not None:
@@ -33,6 +40,20 @@ def load_lightcurve(target, mission='Kepler', quarter=None, sector=None, downloa
         lightcurve = search_result[0].download().flatten()
 
     flux = lightcurve.flux.value
+    if return_metadata:
+        ra = lightcurve.meta.get("RA_OBJ")
+        dec = lightcurve.meta.get("DEC_OBJ")
+        if ra is None:
+            ra = search_result.table["s_ra"][0]
+        if dec is None:
+            dec = search_result.table["s_dec"][0]
+        metadata = {
+            "flux": flux,
+            "ra": float(ra),
+            "dec": float(dec),
+        }
+        return metadata
+
     return flux
 
 

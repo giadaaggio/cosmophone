@@ -26,6 +26,7 @@ def cached_lightcurve(target, mission, quarter, sector):
         mission=mission,
         quarter=quarter,
         sector=sector,
+        return_metadata=True,
     )
 
 st.set_page_config(
@@ -169,12 +170,13 @@ if st.button('Generate sound'):
 
         try:
             with st.spinner("Downloading light curve..."):
-                values = cached_lightcurve(
+                lightcurve_data = cached_lightcurve(
                     target,
                     mission,
                     quarter,
                     sector,
                 )
+                values = lightcurve_data["flux"]
         except ValueError as error:
             st.error(str(error))
             st.stop()
@@ -213,6 +215,8 @@ if st.button('Generate sound'):
     if input_mode == "Astronomical target":
         st.write(f"Target: {target}")
         st.write(f"Mission: {mission}")
+        st.write(f"Right ascension: {lightcurve_data['ra']:.6f}°")
+        st.write(f"Declination: {lightcurve_data['dec']:.6f}°")
 
         if mission == "Kepler":
             st.write(f"Quarter: {quarter}")
