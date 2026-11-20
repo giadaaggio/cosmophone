@@ -339,7 +339,7 @@ st.divider()
 st.header("Example sonifications")
 st.write("Listen to generated examples and compare them with their plots.")
 
-output_dir = Path(__file__).parent / "output"
+output_dir = Path(__file__).parent / "examples"
 examples = [
     ("Kepler-10", "kepler10.wav", "kepler10.png"),
     ("RR Lyrae", "rr_lyrae.wav", "rr_lyrae.png"),

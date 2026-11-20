@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cosmophone - Listen to the light of the stars</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --background: #090d18;
+        --panel: #111827;
+        --border: #263349;
+        --text: #eef3ff;
+        --muted: #aab6cd;
+        --accent: #73d2de;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 32px 20px 64px;
+        background: var(--background);
+        color: var(--text);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      h1 {
+        margin-bottom: 8px;
+        font-size: clamp(2.2rem, 8vw, 4.5rem);
+      }
+
+      h2 {
+        margin-top: 40px;
+      }
+
+      p {
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .intro {
+        max-width: 700px;
+        font-size: 1.08rem;
+      }
+
+      .examples {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      article {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--panel);
+      }
+
+      article img {
+        display: block;
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+        border-bottom: 1px solid var(--border);
+      }
+
+      article section {
+        padding: 16px;
+      }
+
+      article h3 {
+        margin: 0 0 8px;
+      }
+
+      audio {
+        width: 100%;
+        margin-top: 8px;
+      }
+
+      .links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .links a {
+        border: 1px solid var(--accent);
+        border-radius: 999px;
+        padding: 10px 16px;
+        color: var(--text);
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Cosmophone</h1>
+      <p class="intro">
+        Listen to the light of the stars. Cosmophone maps astronomical
+        brightness variations to audible frequencies.
+      </p>
+      <div class="links">
+        <a href="https://github.com/giadaaggio/cosmophone">View source</a>
+        <a href="https://giadaaggio.github.io/cosmophone/">GitHub Pages</a>
+      </div>
+    </header>
+
+    <main>
+      <h2>Example sonifications</h2>
+      <div class="examples">
+        <article>
+          <img src="examples/kepler10.png" alt="Kepler-10 plot">
+          <section>
+            <h3>Kepler-10</h3>
+            <p>Mostly stable brightness with subtle variations.</p>
+            <audio controls src="examples/kepler10.wav"></audio>
+          </section>
+        </article>
+
+        <article>
+          <img src="examples/rr_lyrae.png" alt="RR Lyrae plot">
+          <section>
+            <h3>RR Lyrae</h3>
+            <p>A repeating pulsation pattern.</p>
+            <audio controls src="examples/rr_lyrae.wav"></audio>
+          </section>
+        </article>
+
+        <article>
+          <img src="examples/v1154_cyg.png" alt="V1154 Cygni plot">
+          <section>
+            <h3>V1154 Cygni</h3>
+            <p>A slower, regular stellar cycle.</p>
+            <audio controls src="examples/v1154_cyg.wav"></audio>
+          </section>
+        </article>
+
+        <article>
+          <img src="examples/kic9832227.png" alt="KIC 9832227 plot">
+          <section>
+            <h3>KIC 9832227</h3>
+            <p>Sharp changes associated with eclipses.</p>
+            <audio controls src="examples/kic9832227.wav"></audio>
+          </section>
+        </article>
+
+        <article>
+          <img src="examples/boyajian.png" alt="Boyajian's Star plot">
+          <section>
+            <h3>Boyajian's Star</h3>
+            <p>Irregular brightness variations and abrupt events.</p>
+            <audio controls src="examples/boyajian.wav"></audio>
+          </section>
+        </article>
+      </div>
+    </main>
+  </body>
+</html>

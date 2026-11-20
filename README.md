@@ -7,6 +7,13 @@ brightness into evolving melodies, continuous glissandi, or discrete musical
 notes. The same pipeline can be used with synthetic data, CSV files, or real
 light curves from the Kepler and TESS missions.
 
+## Listen online
+
+The example sonifications can be listened to directly in the browser through
+the [Cosmophone GitHub Pages gallery](https://giadaaggio.github.io/cosmophone/).
+The page is generated from `docs/index.html` and includes audio players for
+each example.
+
 > Start with the [example sonifications](#what-to-listen-for) before
 > experimenting with custom data.
 
@@ -27,11 +34,11 @@ changes. A short fade-in and fade-out are applied before writing the WAV file.
 
 ## What to listen for
 
-- **Kepler-10**: mostly stable brightness with subtle variations ([Kepler-10 audio](output/kepler10.wav) · [plot](output/kepler10.png));
-- **RR Lyrae**: a repeating pulsation pattern ([RR Lyrae audio](output/rr_lyrae.wav) · [plot](output/rr_lyrae.png));
-- **V1154 Cygni**: a slower, more regular stellar cycle ([V1154 Cygni audio](output/v1154_cyg.wav) · [plot](output/v1154_cyg.png));
-- **KIC 9832227**: sharp changes associated with eclipses ([KIC 9832227 audio](output/kic9832227.wav) · [plot](output/kic9832227.png));
-- **KIC 8462852**: irregular brightness variations and abrupt events ([Boyajian's Star audio](output/boyajian.wav) · [plot](output/boyajian.png)).
+- **Kepler-10**: mostly stable brightness with subtle variations ([Kepler-10 audio](examples/kepler10.wav) · [plot](examples/kepler10.png));
+- **RR Lyrae**: a repeating pulsation pattern ([RR Lyrae audio](examples/rr_lyrae.wav) · [plot](examples/rr_lyrae.png));
+- **V1154 Cygni**: a slower, more regular stellar cycle ([V1154 Cygni audio](examples/v1154_cyg.wav) · [plot](examples/v1154_cyg.png));
+- **KIC 9832227**: sharp changes associated with eclipses ([KIC 9832227 audio](examples/kic9832227.wav) · [plot](examples/kic9832227.png));
+- **KIC 8462852**: irregular brightness variations and abrupt events ([Boyajian's Star audio](examples/boyajian.wav) · [plot](examples/boyajian.png)).
 
 The audio is not a literal recording of the stars. It is a mapping from
 measured brightness variations to audible frequencies.
@@ -71,7 +78,7 @@ python .\cosmophone.py `
   --output test.wav
 ```
 
-Files are saved automatically in the `output/` directory.
+Generated files are saved automatically in the `examples/` directory.
 
 ## Streamlit interface
 
@@ -92,7 +99,7 @@ The interface provides three input modes:
 
 Use **Choose a random astronomical target** to load a curated Kepler or TESS
 example into the target form. The interface also includes an examples gallery
-with plots and audio players for the generated files stored in `output/`.
+with plots and audio players for the generated files stored in `examples/`.
 
 After processing the data, the app displays the mapped curve, plays the
 generated sound in the browser, and provides a WAV download button.

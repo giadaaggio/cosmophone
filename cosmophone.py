@@ -179,7 +179,7 @@ def quantize_frequencies(frequencies, scale = (0,2,4,7,9), base = 220.0, octaves
 if __name__ == "__main__":
 
     # create output directory if it doesn't exist
-    OUTPUT_DIR = Path(__file__).parent / "output"
+    OUTPUT_DIR = Path(__file__).parent / "examples"
     OUTPUT_DIR.mkdir(exist_ok=True)
     
     # Input parameters
