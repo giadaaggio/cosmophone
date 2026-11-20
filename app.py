@@ -1,6 +1,10 @@
 import streamlit as st
 import io 
 import numpy as np
+import random
+import pandas as pd
+import altair as alt
+from pathlib import Path
 from scipy.io import wavfile
 from cosmophone import (
     apply_fade,
@@ -13,6 +17,17 @@ from cosmophone import (
     smooth_data,
 )    
 
+# Cache astronomical downloads so repeated visits to the same target avoid
+# downloading and parsing the same light curve again.
+@st.cache_data
+def cached_lightcurve(target, mission, quarter, sector):
+    return load_lightcurve(
+        target,
+        mission=mission,
+        quarter=quarter,
+        sector=sector,
+    )
+
 st.set_page_config(
     page_title='Cosmophone',
     page_icon='*',
@@ -20,6 +35,46 @@ st.set_page_config(
 
 st.title('Cosmophone')
 st.write('Turn astronomical data into sound.')
+
+# Curated targets used by the random-target button.
+RANDOM_TARGETS = [
+    {
+        "target": "Kepler-10",
+        "mission": "Kepler",
+        "quarter": 3,
+        "sector": None,
+    },
+    {
+        "target": "Pi Mensae",
+        "mission": "TESS",
+        "quarter": None,
+        "sector": 1,
+    },
+]
+
+if "target_name" not in st.session_state:
+    st.session_state.target_name = "Kepler-22"
+if "mission" not in st.session_state:
+    st.session_state.mission = "Kepler"
+if "quarter" not in st.session_state:
+    st.session_state.quarter = 3
+if "sector" not in st.session_state:
+    st.session_state.sector = 1
+
+
+def choose_random_target():
+    selected = random.choice(RANDOM_TARGETS)
+    st.session_state.target_name = selected["target"]
+    st.session_state.mission = selected["mission"]
+    st.session_state.quarter = selected["quarter"] or 3
+    st.session_state.sector = selected["sector"] or 1
+
+
+# Update Streamlit session state before the corresponding controls are built.
+st.button(
+    "Choose a random astronomical target",
+    on_click=choose_random_target,
+)
 
 input_mode = st.radio(
     "Input source",
@@ -50,26 +105,27 @@ elif input_mode == "CSV file":
 else:
     target = st.text_input(
         "Target name or catalog ID",
-        "Kepler-22",
+        key="target_name",
     )
 
     mission = st.selectbox(
         "Mission",
         ["Kepler", "TESS"],
+        key="mission",
     )
 
     if mission == "Kepler":
         quarter = st.number_input(
             "Kepler quarter",
             min_value=1,
-            value=3,
+            key="quarter",
             step=1,
         )
     else:
         sector = st.number_input(
             "TESS sector",
             min_value=1,
-            value=1,
+            key="sector",
             step=1,
         )
 
@@ -104,6 +160,7 @@ output_filename = st.text_input(
     "cosmophone.wav",
 )
 
+# Load and validate data from the selected source before any processing.
 if st.button('Generate sound'):
     if input_mode == "Astronomical target":
         if not target:
@@ -112,11 +169,11 @@ if st.button('Generate sound'):
 
         try:
             with st.spinner("Downloading light curve..."):
-                values = load_lightcurve(
+                values = cached_lightcurve(
                     target,
-                    mission=mission,
-                    quarter=quarter,
-                    sector=sector,
+                    mission,
+                    quarter,
+                    sector,
                 )
         except ValueError as error:
             st.error(str(error))
@@ -151,17 +208,18 @@ if st.button('Generate sound'):
         st.error("Maximum frequency must be greater than minimum frequency.")
         st.stop()
 
-    # Recap of input data
+    # Summarize the loaded source and the mission-specific parameters.
     st.write(f'Loaded samples: {len(values)}')
     if input_mode == "Astronomical target":
         st.write(f"Target: {target}")
         st.write(f"Mission: {mission}")
 
-    if mission == "Kepler":
-        st.write(f"Quarter: {quarter}")
-    else:
-        st.write(f"Sector: {sector}")
+        if mission == "Kepler":
+            st.write(f"Quarter: {quarter}")
+        else:
+            st.write(f"Sector: {sector}")
 
+    # Clean and scale the signal before mapping it to audible frequencies.
     values = fill_missing(values)
     values = normalize(values)
     values = smooth_data(values, smooth_window)
@@ -172,15 +230,82 @@ if st.button('Generate sound'):
         f_max=f_max,
     )
 
-    st.subheader("Processed data")
-    st.line_chart(values)
-
-    st.subheader("Mapped frequencies")
-    st.line_chart(frequencies)
-
     if quantize:
         frequencies = quantize_frequencies(frequencies)
 
+    time_axis = np.linspace(
+        0,
+        duration,
+        len(values),
+    )
+
+    processed_data_frame = pd.DataFrame(
+        {
+            "Time (seconds)": time_axis,
+            "Value": values,
+        }
+    ).set_index("Time (seconds)")
+
+    frequency_data_frame = pd.DataFrame(
+        {
+            "Time (seconds)": time_axis,
+            "Frequency (Hz)": frequencies,
+        }
+    ).set_index("Time (seconds)")
+
+    # Altair charts keep the time axis and measurement units explicit.
+    processed_chart = alt.Chart(
+        processed_data_frame.reset_index()
+    ).mark_line().encode(
+        x=alt.X(
+            "Time (seconds):Q",
+            title="Time (seconds)",
+        ),
+        y=alt.Y(
+            "Value:Q",
+            title="Normalized value",
+        ),
+        tooltip=["Time (seconds)", "Value"],
+    ).properties(height=300)
+
+    frequency_chart = alt.Chart(
+        frequency_data_frame.reset_index()
+    )
+
+    if quantize:
+        frequency_chart = frequency_chart.mark_point(size=20)
+    else:
+        frequency_chart = frequency_chart.mark_line()
+
+    frequency_chart = frequency_chart.encode(
+        x=alt.X(
+            "Time (seconds):Q",
+            title="Time (seconds)",
+        ),
+        y=alt.Y(
+            "Frequency (Hz):Q",
+            title="Frequency (Hz)",
+        ),
+        tooltip=["Time (seconds)", "Frequency (Hz)"],
+    ).properties(height=300)
+
+    left_column, right_column = st.columns(2)
+
+    with left_column:
+        st.subheader("Processed data")
+        st.altair_chart(
+            processed_chart,
+            use_container_width=True,
+        )
+
+    with right_column:
+        st.subheader("Mapped frequencies")
+        st.altair_chart(
+            frequency_chart,
+            use_container_width=True,
+        )
+
+    # A continuous frequency curve or discrete quantized notes can be used.
     tone = generate_tone(
         frequencies,
         duration,
@@ -208,3 +333,28 @@ if st.button('Generate sound'):
         file_name=output_filename,
         mime="audio/wav",
     )
+
+# Display locally generated examples independently of the interactive session.
+st.divider()
+st.header("Example sonifications")
+st.write("Listen to generated examples and compare them with their plots.")
+
+output_dir = Path(__file__).parent / "output"
+examples = [
+    ("Kepler-10", "kepler10.wav", "kepler10.png"),
+    ("RR Lyrae", "rr_lyrae.wav", "rr_lyrae.png"),
+    ("V1154 Cygni", "v1154_cyg.wav", "v1154_cyg.png"),
+    ("KIC 9832227", "kic9832227.wav", "kic9832227.png"),
+    ("Boyajian's Star", "boyajian.wav", "boyajian.png"),
+]
+
+for title, audio_name, plot_name in examples:
+    audio_path = output_dir / audio_name
+    plot_path = output_dir / plot_name
+
+    if not audio_path.exists() or not plot_path.exists():
+        continue
+
+    with st.expander(title):
+        st.image(str(plot_path), caption=f"{title} light curve")
+        st.audio(str(audio_path), format="audio/wav")

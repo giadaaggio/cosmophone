@@ -7,6 +7,9 @@ brightness into evolving melodies, continuous glissandi, or discrete musical
 notes. The same pipeline can be used with synthetic data, CSV files, or real
 light curves from the Kepler and TESS missions.
 
+> Start with the [example sonifications](#what-to-listen-for) before
+> experimenting with custom data.
+
 ## How the sonification works
 
 The input samples are interpreted as a one-dimensional signal:
@@ -86,6 +89,10 @@ The interface provides three input modes:
 - manual numeric values;
 - CSV file upload;
 - astronomical target lookup from Kepler or TESS.
+
+Use **Choose a random astronomical target** to load a curated Kepler or TESS
+example into the target form. The interface also includes an examples gallery
+with plots and audio players for the generated files stored in `output/`.
 
 After processing the data, the app displays the mapped curve, plays the
 generated sound in the browser, and provides a WAV download button.
